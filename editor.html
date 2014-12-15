@@ -1,0 +1,86 @@
+<html>
+	<head>
+		<title>Context Free JS Demo</title>
+		<script src="jquery.min.js"></script>	
+		<script src="bootstrap/js/bootstrap.min.js"></script>
+		<link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+		<link rel="stylesheet" href="editor.css">
+		<script src="contextfree.js"></script>
+		<script>
+			function display(){
+				// We need to unescape the id because it is coming in via the hash, and
+				// URL can have weird encodings (i.e., "%20" instead of " ").
+				var theId = unescape(editor.getValue());
+				// document.getElementById("theCode").innerHTML = document.getElementById(theId).value;
+				console.log(theId);
+
+				var t = new Tokenizer();
+				var tokens = t.tokenize( theId );
+				var c = new Compiler();
+				var compiled = c.compile( tokens );
+				console.log(compiled);
+				console.log(tokens);
+
+			    if( compiled.background ){
+			    	var back = compiled.background;
+			    	var backcolor = hsl2rgb( back.h|.001, back.sat|.01, back.b|1, back.a|1 );
+			    	document.body.style.backgroundColor = backcolor;
+			    }
+
+		    	var canvas = document.createElement( "canvas" );
+		    	var container = $("#canvasContainer");
+		    	canvas.width = container.width();
+		    	canvas.height = container.height();
+		    	canvas.id = "theCanvas";
+
+			    $(container).find("#theCanvas").remove();
+			    $(container).append( canvas );
+
+			    var r = Renderer;
+			    r.render( compiled, "theCanvas" );
+			}
+
+			function drawChoice(){
+			    var toDisplay = $("#menu option:selected" ).text();
+			    location.assign( "#"+toDisplay );
+			    location.reload();
+			}
+			$(document).ready(function(){
+				$('#run-code').click(function(e){
+					display();
+				});
+			})
+		</script>
+	</head>
+	<body>
+		<div id="navbar">
+			<span id="brand">ContextFree.js editor</span>
+			<input type="submit" value="Run" class="btn btn-primary" id="run-code">
+		</div>
+		<div class="container">
+			<div id="editor">
+startshape c
+
+rule c{
+    CIRCLE{ s 3 }
+    c{ s .5 b .5 r 10 x 1}
+    }
+
+    rule c{
+    c { s .5}
+    c { s .5 flip 100 }
+    }
+			</div>
+			<div id="canvasContainer">
+			</div>
+		</div>
+
+		<!-- Ace constructor -->
+		<script src="ace-build/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+		<script>
+		    var editor = ace.edit("editor");
+		    editor.setTheme("ace/theme/monokai");
+		    // editor.getSession().setMode("ace/mode/javascript");
+		</script>
+	</body>
+</html>
